@@ -16,7 +16,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+        with:
+          fetch-depth: 0
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -28,6 +29,12 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew build -x test
+
+      - name: SonarCloud Scan
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: ./gradlew sonar --info
 
   test:
     needs: build
@@ -61,8 +68,8 @@ jobs:
       - name: Run Tests
         env:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5434/${{ secrets.DB_NAME }}
-          SPRING_DATASOURCE_USERNAME: ${{ secrets.DB_USER }} # Completa esto
-          SPRING_DATASOURCE_PASSWORD: ${{ secrets.DB_PASSWORD }} # Completa esto
+          SPRING_DATASOURCE_USERNAME: ${{ secrets.DB_USER }}
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: |
           chmod +x ./gradlew
-          ./gradlew build -x test
+          ./gradlew test
